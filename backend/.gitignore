@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+logs
+*.log
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# VSCode
+.vscode/
+
+# TypeScript
+*.tsbuildinfo
+
+# Tests
+tests/*
