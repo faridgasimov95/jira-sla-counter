@@ -12,7 +12,7 @@ export type StatusInterval = {
 };
 
 /**
- * Normalizes raw status entry into a format more suitable for calculations by converting Date into milliseconds.
+ * Normalizes array of raw status entries into a format more suitable for calculations by converting Date into milliseconds.
  * @param values - Array of raw status history entries from the Jira API
  * @returns Array of normalized StatusEntry objects
  */
