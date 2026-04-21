@@ -5,9 +5,8 @@ import ExcelJS from "exceljs";
  * @param buffer - The uploaded Excel file as a buffer
  * @returns Array of ticket numbers
  */
-export const extractTicketsKeys = async (buffer: Buffer): Promise<string[]> => {
+export const extractTicketKeys = async (buffer: Buffer): Promise<string[]> => {
   const workbook = new ExcelJS.Workbook();
-
   await workbook.xlsx.load(buffer as any);
 
   const worksheet = workbook.worksheets[0];
@@ -27,7 +26,14 @@ export const extractTicketsKeys = async (buffer: Buffer): Promise<string[]> => {
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return; // skip header row
     const cell = row.getCell(keyColumnIndex);
-    cell.value && ticketNumbers.push(cell.value?.toString());
+    const cellValue = cell.value;
+    if (cellValue) {
+      if (typeof cellValue === "object" && "text" in cellValue) {
+        ticketNumbers.push(cellValue.text);
+      } else {
+        ticketNumbers.push(cellValue.toString());
+      }
+    }
   });
 
   return ticketNumbers;
@@ -39,9 +45,9 @@ export const extractTicketsKeys = async (buffer: Buffer): Promise<string[]> => {
  * @param results - Map of tickets to calculated SLA in minutes
  * @returns Updated Excel file
  */
-export const appenSlaResults = async (
+export const appendSlaResults = async (
   buffer: Buffer,
-  results: Map<string, number>,
+  results: Map<string, number>
 ): Promise<Buffer> => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as any);
@@ -66,7 +72,16 @@ export const appenSlaResults = async (
   // Fill out the new column
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return;
-    const key = row.getCell(keyColumnIndex).value?.toString();
+    const cell = row.getCell(keyColumnIndex);
+    const cellValue = cell.value;
+    let key;
+    if (cellValue) {
+      if (typeof cellValue === "object" && "text" in cellValue) {
+        key = cellValue.text;
+      } else {
+        key = cellValue?.toString();
+      }
+    }
     if (key && results.has(key)) {
       row.getCell(lastColumnIndex + 1).value = results.get(key);
       row.commit();
