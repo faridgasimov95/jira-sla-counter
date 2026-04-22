@@ -31,4 +31,4 @@ Thumbs.db
 *.tsbuildinfo
 
 # Tests
-tests/*
+src/tests/
