@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { processExcelFile } from "../api/jiraApi";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -9,24 +10,9 @@ export default function UploadPage() {
 
     setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/process`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to process file");
-      }
-
       // Download the returned file
-      const blob = await response.blob();
+      const blob = await processExcelFile(file);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
