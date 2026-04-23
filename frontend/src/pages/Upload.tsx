@@ -1,10 +1,32 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { processExcelFile } from "../api/jiraApi";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanup memory on unmount
+  useEffect(() => {
+    return () => {
+      if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    };
+  }, [downloadUrl]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
+  };
+
+  const handleReset = () => {
+    setDownloadUrl(null);
+    setFile(null);
+    // DOM Sync: clear input value so onChange fires even if the same file is selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleUpload = async () => {
     if (!file) return;
@@ -30,8 +52,6 @@ export default function UploadPage() {
     a.href = downloadUrl;
     a.download = "sla-results.xlsx";
     a.click();
-    URL.revokeObjectURL(downloadUrl);
-    setDownloadUrl(null);
   };
 
   return (
@@ -45,15 +65,17 @@ export default function UploadPage() {
         <h1 className="text-xl font-bold mb-4">JIRA SLA Counter Tool</h1>
         <div className="flex items-center gap-2">
           <input
+            ref={fileInputRef}
             type="file"
             accept=".xls, .xlsx"
             className="w-64"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onClick={handleReset}
+            onChange={handleFileChange}
           />
           {isLoading && (
             <>
               <div className="w-5 h-5 border-2 border-yellow-500 border-t-1 rounded-lg animate-spin" />
-              <span className="text-sm text-gray-500">Processing...</span>
+              <span className="text-sm text-gray-600">Processing...</span>
             </>
           )}
           {downloadUrl && (
