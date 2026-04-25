@@ -7,6 +7,8 @@ export default function UploadPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [noFileWarning, setNoFileWarning] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fileHasWarnings, setFileHasWarnings] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cleanup memory on unmount
@@ -25,6 +27,8 @@ export default function UploadPage() {
     setDownloadUrl(null);
     setFile(null);
     setNoFileWarning(false);
+    setFileHasWarnings(false);
+    setError(null);
     // DOM Sync: clear input value so onChange fires even if the same file is selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -39,15 +43,17 @@ export default function UploadPage() {
 
     setIsLoading(true);
     setDownloadUrl(null);
-    setNoFileWarning(false);
+    setFileHasWarnings(false);
+    setError(null);
 
     try {
       // Generate the download URL
-      const blob = await processExcelFile(file);
+      const { blob, hasWarnings } = await processExcelFile(file);
+      setFileHasWarnings(hasWarnings);
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
     } catch (err) {
-      console.error(err);
+      if (err instanceof Error) setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +81,14 @@ export default function UploadPage() {
           message="⚠ Please select the file first!"
         />
       )}
+      {fileHasWarnings && (
+        <StatusNotification
+          status="warning"
+          message="⚠ Some tickets could not be processed. Check the Excel file for details."
+          second
+        />
+      )}
+      {error && <StatusNotification status="error" message={`❌ ${error}`} />}
       <div className="w-1/4 bg-[rgb(255,255,245)] p-6 rounded-3xl shadow-2xl text-center">
         <h1 className="text-xl font-bold mb-4">JIRA SLA Counter Tool</h1>
         <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 type StatusNotificationProps = {
   status: "success" | "warning" | "error";
   message: string;
+  second?: boolean;
 };
 
 const bgColors = {
@@ -12,6 +13,7 @@ const bgColors = {
 export default function StatusNotification({
   status,
   message,
+  second = false,
 }: StatusNotificationProps) {
   const bgColor =
     status === "success"
@@ -20,9 +22,11 @@ export default function StatusNotification({
       ? bgColors.warning
       : bgColors.error;
 
+  const topPos: string = second ? "top-12" : "top-0";
+
   return (
     <div
-      className={`fixed top-0 w-full bg-green-500 text-white px-6 py-3 shadow-lg animate-fadeIn text-center ${bgColor}`}
+      className={`fixed ${topPos} w-full bg-green-500 text-white px-6 py-3 shadow-lg text-center ${bgColor} animate-fadeIn `}
     >
       {message}
     </div>

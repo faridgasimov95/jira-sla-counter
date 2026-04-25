@@ -20,6 +20,12 @@ app.get("/", (req, res) => {
   res.send("API is running");
 });
 
+app.use(
+  cors({
+    exposedHeaders: ["X-Has-Warnings"],
+  })
+);
+
 app.use("/api", slaRoutes);
 
 export default app;

@@ -1,4 +1,5 @@
 import ExcelJS from "exceljs";
+import { ClientError } from "../utils/errors";
 
 /**
  * Extract Jira ticket numbers from the "Key" column of an Excel file.
@@ -18,7 +19,7 @@ export const extractTicketKeys = async (buffer: Buffer): Promise<string[]> => {
   });
 
   if (keyColumnIndex === -1) {
-    throw new Error('No column named "Key" was found in the Excel file');
+    throw new ClientError("No column named 'Key' was found in the Excel file");
   }
 
   const ticketNumbers: string[] = [];
@@ -47,7 +48,7 @@ export const extractTicketKeys = async (buffer: Buffer): Promise<string[]> => {
  */
 export const appendSlaResults = async (
   buffer: Buffer,
-  results: Map<string, number>
+  results: Map<string, number | string>
 ): Promise<Buffer> => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as any);
