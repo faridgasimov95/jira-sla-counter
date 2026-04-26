@@ -75,6 +75,11 @@ export const processFile = async (
       }
     }
 
+    if (Array.from(results.values()).every((v) => typeof v === "string")) {
+      res.status(400).json({ error: "None of the tickets could be processed" });
+      return;
+    }
+
     const hasProblematic = Array.from(results.values()).some(
       (v) =>
         v === "NO ACCESS" ||

@@ -24,16 +24,22 @@ export const extractTicketKeys = async (buffer: Buffer): Promise<string[]> => {
 
   const ticketNumbers: string[] = [];
 
+  const isValidKey = (key: string) => /^[A-Z]+-\d+$/.test(key);
+
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return; // skip header row
     const cell = row.getCell(keyColumnIndex);
     const cellValue = cell.value;
+    let key: string | undefined;
     if (cellValue) {
       if (typeof cellValue === "object" && "text" in cellValue) {
-        ticketNumbers.push(cellValue.text);
+        key = cellValue.text;
       } else {
-        ticketNumbers.push(cellValue.toString());
+        key = cellValue.toString();
       }
+    }
+    if (key && isValidKey(key)) {
+      ticketNumbers.push(key);
     }
   });
 
@@ -70,6 +76,10 @@ export const appendSlaResults = async (
   headerRow.getCell(lastColumnIndex + 1).value = "SLA Real Elapsed Time";
   headerRow.commit();
 
+  const newColumn = worksheet.getColumn(lastColumnIndex + 1);
+  autoFitColumnWidth(newColumn);
+  newColumn.numFmt = "@";
+
   // Fill out the new column
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return;
@@ -91,4 +101,25 @@ export const appendSlaResults = async (
 
   const updatedBuffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(updatedBuffer);
+};
+
+/**
+ * Auto-fit column's width
+ *
+ * @param column
+ * @param minimalWidth
+ */
+export const autoFitColumnWidth = (
+  column: ExcelJS.Column,
+  minimalWidth = 10
+) => {
+  let maxColumnLength = 0;
+  column.eachCell({ includeEmpty: true }, (cell) => {
+    maxColumnLength = Math.max(
+      maxColumnLength,
+      minimalWidth,
+      cell.value ? cell.value.toString().length : 0
+    );
+  });
+  column.width = maxColumnLength + 2;
 };
