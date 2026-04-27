@@ -24,4 +24,6 @@ model Settings{
   jiraToken           String?
   ignoredStatusCodes  Int[]
   priorityThresholds  Json
+  country             String?
+  excelPassword        String?
 }

@@ -124,8 +124,9 @@ export default function UploadPage() {
           )}
           {!isLoading && (
             <button
-              className="px-3 py-1 rounded border-2 border-solid border-gray-600 bg-yellow-500 ml-auto"
+              className="px-3 py-1 rounded border-2 border-solid border-gray-600 bg-yellow-500 ml-auto disabled:opacity-50"
               onClick={handleUpload}
+              disabled={downloadUrl !== null}
             >
               Upload
             </button>
