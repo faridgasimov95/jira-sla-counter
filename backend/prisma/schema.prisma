@@ -13,6 +13,7 @@ model User {
   password            String
   createdAt           DateTime    @default(now())
   settings            Settings?
+  savedFiles          SavedFile[]
 }
 
 model Settings{
@@ -23,7 +24,16 @@ model Settings{
   jiraUsername        String?
   jiraToken           String?
   ignoredStatusCodes  Int[]
-  priorityThresholds  Json
+  priorityThresholds  Json?
   country             String?
-  excelPassword        String?
+  excelPassword       String?
+}
+
+model SavedFile{
+  id                  Int         @id @default(autoincrement())
+  userId              Int         @unique
+  user                User        @relation(fields: [userId], references: [id])
+  savedAt             DateTime    @default(now())
+  filename            String
+  filedata            Bytes
 }
