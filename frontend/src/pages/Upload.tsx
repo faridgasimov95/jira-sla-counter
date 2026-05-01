@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { processExcelFile } from "../api/jiraApi";
 import StatusNotification from "../components/Notification";
+import { useAuth } from "../context/AuthContext";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -10,6 +11,7 @@ export default function UploadPage() {
   const [error, setError] = useState<string | null>(null);
   const [fileHasWarnings, setFileHasWarnings] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   // Cleanup memory on unmount
   useEffect(() => {
@@ -48,7 +50,8 @@ export default function UploadPage() {
 
     try {
       // Generate the download URL
-      const { blob, hasWarnings } = await processExcelFile(file);
+
+      const { blob, hasWarnings } = await processExcelFile(file, user!.token);
       setFileHasWarnings(hasWarnings);
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);

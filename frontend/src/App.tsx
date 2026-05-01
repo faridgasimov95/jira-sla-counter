@@ -1,10 +1,40 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import AuthContextProvider from "./context/AuthContext";
 import UploadPage from "./pages/Upload";
+import HistoryPage from "./pages/History";
+import RootLayout from "./pages/Root";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: (
+          <ProtectedRoute>
+            <UploadPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "history",
+        element: (
+          <ProtectedRoute>
+            <HistoryPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+]);
 
 function App() {
   return (
-    <div className="bg-gray-500 min-h-screen flex items-center justify-center">
-      <UploadPage />
-    </div>
+    <AuthContextProvider>
+      <RouterProvider router={router} />
+    </AuthContextProvider>
   );
 }
 
