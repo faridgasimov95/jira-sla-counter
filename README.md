@@ -1,3 +1,5 @@
+> 🚧 Under active development — README will be updated upon deployment.
+
 # Jira SLA Counter
 
 A web tool for processing Jira ticket SLA data. Fetches ticket status history from Jira and calculates total time spent in "Second line" support.
