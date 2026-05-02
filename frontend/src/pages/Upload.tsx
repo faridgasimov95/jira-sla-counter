@@ -71,7 +71,7 @@ export default function UploadPage() {
   };
 
   return (
-    <>
+    <div className="flex h-full bg-background items-center justify-center">
       {downloadUrl && (
         <StatusNotification
           status="success"
@@ -92,14 +92,13 @@ export default function UploadPage() {
         />
       )}
       {error && <StatusNotification status="error" message={`❌ ${error}`} />}
-      <div className="w-1/4 bg-[rgb(255,255,245)] p-6 rounded-3xl shadow-2xl text-center">
-        <h1 className="text-xl font-bold mb-4">JIRA SLA Counter Tool</h1>
-        <div className="flex items-center gap-2">
+      <div className="bg-surface border border-border p-8 rounded-2xl shadow-sm w-96">
+        <h1 className="text-xl font-semibold mb-4">Upload Your File</h1>
+        <div className="flex items-center gap-3">
           <input
             ref={fileInputRef}
             type="file"
             accept=".xls, .xlsx"
-            className="w-64"
             onChange={handleFileChange}
             hidden
           />
@@ -109,17 +108,17 @@ export default function UploadPage() {
               fileInputRef.current?.click();
             }}
             disabled={isLoading}
-            className="px-3 py-1 rounded border-2 border-solid border-gray-600 bg-gray-200 disabled:opacity-50"
+            className="px-4 py-2 rounded-lg border border-divider text-sm text-text-base hover:bg-slate-50 transition-colors disabled:opacity-50"
           >
             Choose File
           </button>
-          <div className="w-1/4 truncate">
+          <span className="text-sm text-text-muted flex-1 truncate">
             {file ? file.name : "No file chosen"}
-          </div>
+          </span>
 
           {downloadUrl && (
             <button
-              className="px-3 py-1 rounded border-2 border-solid border-gray-600 bg-green-500 text-white"
+              className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-white text-sm font-medium transition-colors"
               onClick={handleDownload}
             >
               Download
@@ -127,7 +126,7 @@ export default function UploadPage() {
           )}
           {!isLoading && (
             <button
-              className="px-3 py-1 rounded border-2 border-solid border-gray-600 bg-yellow-500 ml-auto disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors"
               onClick={handleUpload}
               disabled={downloadUrl !== null}
             >
@@ -136,12 +135,12 @@ export default function UploadPage() {
           )}
           {isLoading && (
             <>
-              <div className="w-6 h-6 ml-auto border-2 border-yellow-500 rounded-lg animate-spin" />
+              <div className="w-4 h-4 border-2 border-primary rounded-full animate-spin" />
               <span className="text-sm text-gray-600">Processing...</span>
             </>
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -9,9 +9,9 @@ export default function ProtectedRoute({
   const { isAuthenticated } = useAuth();
 
   return (
-    <div>
+    <>
       {!isAuthenticated && <AuthModal />}
       {isAuthenticated && children}
-    </div>
+    </>
   );
 }

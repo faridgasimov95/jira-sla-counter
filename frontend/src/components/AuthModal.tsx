@@ -77,18 +77,15 @@ export default function AuthModal() {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <dialog
-        className="bg-[rgb(255,255,245)] rounded-3xl shadow-2xl p-8 w-96"
-        open
-      >
-        <div className="flex border-2 border-gray-200 rounded-xl p-1 mb-6">
+    <div className="h-full flex items-center justify-center bg-background">
+      <div className="bg-surface rounded-2xl shadow-sm border border-divider p-8 w-96 ">
+        <div className="flex border border-divider rounded-lg p-1 mb-6">
           <button
             onClick={() => changeActiveTab(ActiveTab.SignIn)}
-            className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex-1 py-1.5 rounded-md text-sm font-semibold transition-colors ${
               activeTab === ActiveTab.SignIn
-                ? "bg-yellow-500 text-white hover:text-gray-100 hover:bg-yellow-400"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-primary text-white hover:bg-primary-hover hover:text-gray-100 "
+                : "text-text-muted hover:text-text-base"
             }`}
           >
             Sign-In
@@ -97,75 +94,80 @@ export default function AuthModal() {
             onClick={() => changeActiveTab(ActiveTab.SignUp)}
             className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
               activeTab === ActiveTab.SignUp
-                ? "bg-yellow-500 text-white hover:text-gray-100 hover:bg-yellow-400"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-primary text-white hover:bg-primary-hover hover:text-gray-100 "
+                : "text-text-muted hover:text-text-base"
             }`}
           >
             Sign-Up
           </button>
         </div>
         {error && (
-          <p className="text-red-500 text-sm bg-red-50 rounded-lg px-3 py-2 mb-4">
+          <p className="text-error text-sm bg-error-bg rounded-lg px-3 py-2 mb-4">
             {error}
           </p>
         )}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
               Email
             </label>
             <input
               type="email"
               name="email"
               value={authData.email}
+              placeholder="you@company.com"
               onChange={(e) =>
                 setAuthData((prev) => ({ ...prev, email: e.target.value }))
               }
-              className="border-2 border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-yellow-500 transition-colors bg-transparent"
+              className="border border-divider rounded-lg px-3 py-2 text-sm text-text-base outline-none focus:border-primary transition-colors bg-transparent"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
               Password
             </label>
             <input
               type="password"
               name="password"
               value={authData.password}
+              placeholder="Min. 8 characters"
               onChange={(e) =>
                 setAuthData((prev) => ({ ...prev, password: e.target.value }))
               }
-              className="border-2 border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-yellow-500 transition-colors bg-transparent"
+              className="border border-divider rounded-lg px-3 py-2 text-sm text-text-base outline-none focus:border-primary transition-colors bg-transparent"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          <div
+            className={`flex flex-col gap-1 ${
+              activeTab === ActiveTab.SignIn ? "invisible" : ""
+            }`}
+          >
+            <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
               Confirm Password
             </label>
-            {activeTab === ActiveTab.SignUp && (
-              <input
-                type="password"
-                name="confirmPassword"
-                value={authData.confirmPassword}
-                onChange={(e) =>
-                  setAuthData((prev) => ({
-                    ...prev,
-                    confirmPassword: e.target.value,
-                  }))
-                }
-                className="border-2 border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-yellow-500 transition-colors bg-transparent"
-              />
-            )}
+            <input
+              type="password"
+              name="confirmPassword"
+              value={authData.confirmPassword}
+              onChange={(e) =>
+                setAuthData((prev) => ({
+                  ...prev,
+                  confirmPassword: e.target.value,
+                }))
+              }
+              placeholder="Repeat your password"
+              className="border border-divider rounded-lg px-3 py-2 text-sm text-text-base outline-none focus:border-primary transition-colors bg-transparent"
+            />
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 mt-1 rounded-xl bg-yellow-500 font-semibold hover:bg-yellow-400 transition-colors disabled:opacity-50"
+            className="w-full py-2.5 mt-1 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-colors disabled:opacity-50 "
           >
             Submit
           </button>
         </form>
-      </dialog>
+      </div>
     </div>
   );
 }
