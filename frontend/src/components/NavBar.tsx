@@ -3,21 +3,25 @@ import { useAuth } from "../context/AuthContext";
 
 export default function NavBar() {
   const { user, signOut } = useAuth();
-  function openSettings() {}
+
   return (
-    <nav className="bg-nav-bg border-b border-divider px-6 py-3 flex items-center">
-      <span className="text-nav-text text-lg font-bold">Jira SLA Counter</span>
+    <nav className="bg-nav-bg border-b border-divider px-6 flex items-stretch h-14">
+      <span className="text-xl text-nav-text font-bold flex items-center px-4">
+        Jira SLA Counter
+      </span>
 
       {user && (
-        <div className="flex items-center gap-6 ml-auto">
-          <span className="text-sm text-nav-text-muted">{user.email}</span>
+        <div className="flex items-stretch ml-auto">
+          <span className="text-sm text-nav-text-muted flex items-center px-4">
+            {user.email}
+          </span>
 
           <NavLink
             to="/"
             className={({ isActive }) =>
               isActive
-                ? "text-sm font-semibold text-nav-active"
-                : "text-sm text-nav-text hover:text-nav-text-muted transition-colors"
+                ? "text-sm font-semibold  bg-surface text-primary flex items-center px-4"
+                : "text-sm text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
             }
           >
             Upload
@@ -27,23 +31,27 @@ export default function NavBar() {
             to="/history"
             className={({ isActive }) =>
               isActive
-                ? "text-sm font-semibold text-nav-active"
-                : "text-sm text-nav-text hover:text-nav-text-muted transition-colors"
+                ? "text-sm font-semibold  bg-surface text-primary flex items-center px-4"
+                : "text-sm text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
             }
           >
             History
           </NavLink>
 
-          <button
-            onClick={openSettings}
-            className="text-sm text-nav-text hover:text-nav-text-muted transition-colors"
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              isActive
+                ? "text-sm font-semibold  bg-surface text-primary flex items-center px-4"
+                : "text-sm text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
+            }
           >
             Settings
-          </button>
+          </NavLink>
 
           <button
             onClick={signOut}
-            className="text-sm px-3 py-1.5 rounded-lg border border-nav-text-muted text-nav-text hover:bg-nav-hover transition-colors"
+            className="text-sm text-nav-text hover:bg-red-600 flex items-center px-4 transition-colors"
           >
             Log Out
           </button>

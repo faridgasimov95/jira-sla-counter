@@ -4,6 +4,7 @@ import UploadPage from "./pages/Upload";
 import HistoryPage from "./pages/History";
 import RootLayout from "./pages/Root";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SettingsPage from "./pages/Settings";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <HistoryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         ),
       },
