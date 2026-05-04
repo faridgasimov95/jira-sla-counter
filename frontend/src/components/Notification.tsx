@@ -22,7 +22,7 @@ export default function StatusNotification({
       ? bgColors.warning
       : bgColors.error;
 
-  const topPos: string = second ? "top-12" : "top-0";
+  const topPos: string = second ? "top-24" : "top-12";
 
   return (
     <div

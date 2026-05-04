@@ -21,7 +21,7 @@ export default function NavBar() {
             className={({ isActive }) =>
               isActive
                 ? "text-sm font-semibold  bg-surface text-primary flex items-center px-4"
-                : "text-sm text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
+                : "text-sm font-medium text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
             }
           >
             Upload
@@ -32,7 +32,7 @@ export default function NavBar() {
             className={({ isActive }) =>
               isActive
                 ? "text-sm font-semibold  bg-surface text-primary flex items-center px-4"
-                : "text-sm text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
+                : "text-sm font-medium text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
             }
           >
             History
@@ -43,7 +43,7 @@ export default function NavBar() {
             className={({ isActive }) =>
               isActive
                 ? "text-sm font-semibold  bg-surface text-primary flex items-center px-4"
-                : "text-sm text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
+                : "text-sm font-medium text-nav-text hover:text-nav-text-muted hover:bg-nav-hover flex items-center px-4 transition-colors"
             }
           >
             Settings
