@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { signUp as apiSignUp, signIn as apiSignIn } from "../api/authApi";
+import { useAuth } from "../context/AuthContext.tsx";
+import { signUp as apiSignUp, signIn as apiSignIn } from "../api/authApi.ts";
 import { AuthCredentials } from "../types/auth.ts";
 
 enum ActiveTab {
@@ -8,7 +8,7 @@ enum ActiveTab {
   SignIn = "SIGNIN",
 }
 
-export default function AuthModal() {
+export default function Auth() {
   const [activeTab, setActiveTab] = useState(ActiveTab.SignIn);
   const [authData, setAuthData] = useState({
     email: "",
@@ -77,7 +77,7 @@ export default function AuthModal() {
   }
 
   return (
-    <div className="h-full flex items-center justify-center bg-background">
+    <div className="flex h-full bg-background items-center justify-center">
       <div className="bg-surface rounded-2xl shadow-sm border border-divider p-8 w-96 ">
         <div className="flex border border-divider rounded-lg p-1 mb-6">
           <button

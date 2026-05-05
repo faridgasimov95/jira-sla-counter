@@ -16,7 +16,7 @@ export default function FormField({
           {label}
         </label>
         {optional && (
-          <span className="text-xs text-text-muted bg-slate-100 px-1.5 py-0.5 rounded">
+          <span className="text-xs text-text-muted bg-slate-100 px-1.5 rounded">
             optional
           </span>
         )}

@@ -1,5 +1,5 @@
 import { useAuth } from "../context/AuthContext";
-import AuthModal from "./AuthModal";
+import Auth from "./Auth";
 
 export default function ProtectedRoute({
   children,
@@ -10,7 +10,7 @@ export default function ProtectedRoute({
 
   return (
     <>
-      {!isAuthenticated && <AuthModal />}
+      {!isAuthenticated && <Auth />}
       {isAuthenticated && children}
     </>
   );

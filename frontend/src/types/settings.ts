@@ -3,12 +3,13 @@ export interface SettingsForm {
   jiraUsername: string;
   jiraToken: string;
   country: string;
-  ignoredStatusCodes: string;
+  ignoredStatusCodes: number[];
   excelPassword: string;
-  priorityThresholds: { name: string; minutes: number }[];
+  priorityThresholds: PriorityThreshold[];
 }
 
 export interface PriorityThreshold {
+  id: number;
   name: string;
   minutes: number;
 }
