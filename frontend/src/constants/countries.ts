@@ -1,5 +1,4 @@
 export const COUNTRIES = [
-  { code: "AZ", name: "Azerbaijan" },
   { code: "AD", name: "Andorra" },
   { code: "AL", name: "Albania" },
   { code: "AM", name: "Armenia" },
@@ -7,6 +6,7 @@ export const COUNTRIES = [
   { code: "AT", name: "Austria" },
   { code: "AU", name: "Australia" },
   { code: "AX", name: "Åland Islands" },
+  { code: "AZ", name: "Azerbaijan" },
   { code: "BA", name: "Bosnia and Herzegovina" },
   { code: "BB", name: "Barbados" },
   { code: "BD", name: "Bangladesh" },

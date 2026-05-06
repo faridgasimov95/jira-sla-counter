@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext.tsx";
 import { signUp as apiSignUp, signIn as apiSignIn } from "../api/authApi.ts";
 import { AuthCredentials } from "../types/auth.ts";
+import { submitButtonClass } from "../constants/styles.ts";
+import FormField from "./FormField.tsx";
 
 enum ActiveTab {
   SignUp = "SIGNUP",
@@ -107,62 +109,47 @@ export default function Auth() {
           </p>
         )}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={authData.email}
-              placeholder="you@company.com"
-              onChange={(e) =>
-                setAuthData((prev) => ({ ...prev, email: e.target.value }))
-              }
-              className="border border-divider rounded-lg px-3 py-2 text-sm text-text-base outline-none focus:border-primary transition-colors bg-transparent"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={authData.password}
-              placeholder="Min. 8 characters"
-              onChange={(e) =>
-                setAuthData((prev) => ({ ...prev, password: e.target.value }))
-              }
-              className="border border-divider rounded-lg px-3 py-2 text-sm text-text-base outline-none focus:border-primary transition-colors bg-transparent"
-            />
-          </div>
-          <div
-            className={`flex flex-col gap-1 ${
-              activeTab === ActiveTab.SignIn ? "invisible" : ""
-            }`}
-          >
-            <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={authData.confirmPassword}
-              onChange={(e) =>
-                setAuthData((prev) => ({
-                  ...prev,
-                  confirmPassword: e.target.value,
-                }))
-              }
-              placeholder="Repeat your password"
-              className="border border-divider rounded-lg px-3 py-2 text-sm text-text-base outline-none focus:border-primary transition-colors bg-transparent"
-            />
-          </div>
+          <FormField
+            label="Email"
+            type="email"
+            name="email"
+            value={authData.email}
+            placeholder="you@company.com"
+            onChange={(e) =>
+              setAuthData((prev) => ({ ...prev, email: e.target.value }))
+            }
+          />
+
+          <FormField
+            label="Password"
+            type="password"
+            name="password"
+            value={authData.password}
+            placeholder="Min. 8 characters"
+            onChange={(e) =>
+              setAuthData((prev) => ({ ...prev, password: e.target.value }))
+            }
+          />
+
+          <FormField
+            label="Confirm Password"
+            type="password"
+            name="confirmPassword"
+            value={authData.confirmPassword}
+            placeholder="Repeat your password"
+            onChange={(e) =>
+              setAuthData((prev) => ({
+                ...prev,
+                confirmPassword: e.target.value,
+              }))
+            }
+            invisible={activeTab === ActiveTab.SignIn}
+          />
+
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 mt-1 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-colors disabled:opacity-50 "
+            className={submitButtonClass}
           >
             Submit
           </button>
