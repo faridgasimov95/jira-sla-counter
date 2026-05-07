@@ -5,9 +5,9 @@ type StatusNotificationProps = {
 };
 
 const bgColors = {
-  success: "bg-green-500",
-  warning: "bg-yellow-500",
-  error: "bg-red-500",
+  success: "bg-primary",
+  warning: "bg-amber-500",
+  error: "bg-error",
 };
 
 export default function StatusNotification({
@@ -26,7 +26,7 @@ export default function StatusNotification({
 
   return (
     <div
-      className={`fixed ${topPos} w-full bg-green-500 text-white px-6 py-3 shadow-lg text-center ${bgColor} animate-fadeIn `}
+      className={`fixed ${topPos} w-full text-white px-6 py-3 shadow-lg text-center ${bgColor} animate-fadeIn border-t-2 border-white/20`}
     >
       {message}
     </div>
