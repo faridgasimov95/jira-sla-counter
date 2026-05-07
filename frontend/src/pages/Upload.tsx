@@ -118,24 +118,23 @@ export default function UploadPage() {
 
           {downloadUrl && (
             <button
-              className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-white text-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors"
               onClick={handleDownload}
             >
               Download
             </button>
           )}
-          {!isLoading && (
+          {!isLoading && !downloadUrl && (
             <button
-              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors"
               onClick={handleUpload}
-              disabled={downloadUrl !== null}
             >
               Upload
             </button>
           )}
           {isLoading && (
             <>
-              <div className="w-4 h-4 border-2 border-primary rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
               <span className="text-sm text-gray-600">Processing...</span>
             </>
           )}
