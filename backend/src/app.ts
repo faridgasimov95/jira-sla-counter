@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import slaRoutes from "./routes/slaRoutes";
 import authRoutes from "./routes/authRoutes";
+import settingsRouter from "./routes/settingsRoutes";
 
 /**
  * Express App configuration.
@@ -22,5 +23,6 @@ app.get("/", (req, res) => {
 
 app.use("/api", slaRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/settings", settingsRouter);
 
 export default app;
