@@ -23,7 +23,7 @@ export const requireAuth = (
 
   try {
     const payload = jwt.verify(token, env.jwtSecret) as AuthPayload;
-    (req as any).user = payload;
+    req.user = payload;
     next();
   } catch {
     res.status(401).json({ error: "Invalid token." });
