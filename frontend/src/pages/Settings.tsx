@@ -1,8 +1,17 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SettingsForm } from "../types/settings.ts";
 import FormField from "../components/FormField.tsx";
 import { COUNTRIES } from "../constants/countries.ts";
 import { inputClass, submitButtonClass } from "../constants/styles.ts";
+import {
+  setSettings as apiSetSettings,
+  getSettings,
+} from "../api/settingsApi.ts";
+import { useAuth } from "../context/AuthContext.tsx";
+import StatusNotification, {
+  StatusNotificationProps,
+} from "../components/Notification.tsx";
+import { useSettings } from "../context/SettingsContext.tsx";
 
 export default function SettingsPage() {
   const [userSettings, setUserSettings] = useState<SettingsForm>({
@@ -18,6 +27,60 @@ export default function SettingsPage() {
   const [errors, setErrors] = useState<
     Partial<Record<keyof SettingsForm, string>>
   >({});
+  const { user } = useAuth();
+  const [notification, setNotification] =
+    useState<StatusNotificationProps | null>(null);
+  const [isLeaving, setIsLeaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const timeoutRef1 = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef2 = useRef<ReturnType<typeof setTimeout>>();
+  const { handleSettingsComplete } = useSettings();
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const data = await getSettings(user!.token);
+        setUserSettings({
+          ...data,
+          jiraSubdomain: data.jiraSubdomain ?? "",
+          jiraUsername: data.jiraUsername ?? "",
+          jiraToken: data.jiraToken ?? "",
+          country: data.country ?? "",
+          excelPassword: data.excelPassword ?? "",
+          priorityThresholds: data.priorityThresholds ?? [],
+          ignoredStatusCodes: data.ignoredStatusCodes ?? [],
+        });
+      } catch (err) {
+        if (err instanceof Error) {
+          showNotification("error", err.message);
+        }
+        console.error(err);
+      }
+    }
+    fetchSettings();
+
+    return () => {
+      clearTimeout(timeoutRef1.current);
+      clearTimeout(timeoutRef2.current);
+    };
+  }, []);
+
+  function showNotification(
+    status: "success" | "warning" | "error",
+    message: string
+  ) {
+    clearTimeout(timeoutRef1.current);
+    clearTimeout(timeoutRef2.current);
+
+    setIsLeaving(false);
+    setNotification({ status, message });
+
+    timeoutRef1.current = setTimeout(() => setIsLeaving(true), 3000);
+    timeoutRef2.current = setTimeout(() => {
+      setNotification(null);
+      setIsLeaving(false);
+    }, 3500);
+  }
 
   function handleAddStatusCode() {
     const code = Number(statusCodeInput);
@@ -72,9 +135,11 @@ export default function SettingsPage() {
     }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    setNotification(null);
+    setErrors({});
     const newErrors: Partial<Record<keyof SettingsForm, string>> = {};
 
     if (!userSettings.jiraSubdomain) newErrors.jiraSubdomain = "Required";
@@ -90,11 +155,33 @@ export default function SettingsPage() {
       return;
     }
 
-    //TODO: API calls
+    try {
+      setIsLoading(true);
+      await apiSetSettings(userSettings, user!.token);
+      handleSettingsComplete(
+        !!userSettings.jiraSubdomain &&
+          !!userSettings.jiraUsername &&
+          !!userSettings.jiraToken &&
+          !!userSettings.country
+      );
+      showNotification("success", "Settings saved successfully");
+    } catch (err) {
+      if (err instanceof Error) showNotification("error", err.message);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <div className="flex h-full bg-background items-start justify-center pt-16">
+      {notification && (
+        <StatusNotification
+          status={notification.status}
+          message={notification.message}
+          isLeaving={isLeaving}
+        />
+      )}
       <div className=" bg-surface border border-border p-8 rounded-2xl shadow-sm w-[480px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <h1 className="text-xl font-semibold">Settings</h1>
@@ -273,7 +360,11 @@ export default function SettingsPage() {
               </span>
             )}
           </div>
-          <button type="submit" className={submitButtonClass}>
+          <button
+            type="submit"
+            className={submitButtonClass}
+            disabled={isLoading}
+          >
             Save
           </button>
         </form>

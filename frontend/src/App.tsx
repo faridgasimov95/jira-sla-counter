@@ -5,6 +5,7 @@ import HistoryPage from "./pages/History";
 import RootLayout from "./pages/Root";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SettingsPage from "./pages/Settings";
+import SettingsContextProvider from "./context/SettingsContext";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +43,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AuthContextProvider>
-      <RouterProvider router={router} />
+      <SettingsContextProvider>
+        <RouterProvider router={router} />
+      </SettingsContextProvider>
     </AuthContextProvider>
   );
 }

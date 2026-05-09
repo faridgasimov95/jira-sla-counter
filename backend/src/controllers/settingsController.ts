@@ -41,7 +41,7 @@ export const updateSettings = async (
       priorityThresholds,
       country,
       excelPassword,
-    } = req.body.settings;
+    } = req.body;
 
     const settings = await prisma.settings.upsert({
       where: { userId: req.user.userId },
