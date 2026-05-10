@@ -56,7 +56,7 @@ export const WORKING_HOURS = {
  * @param date - The date to evaluate
  * @returns The DayType of the given date
  */
-export const getDayType = (date: Date): DayType => {
+export const getDayType = (date: Date, specialDays: SpecialDay[]): DayType => {
   const dateString = date.toLocaleDateString("en-CA");
 
   const isSpecial = specialDays.find((day) => day.date === dateString);

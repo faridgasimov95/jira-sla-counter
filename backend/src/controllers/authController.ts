@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "../../generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import prisma from "../prisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import env from "../config/env";
@@ -10,9 +9,6 @@ import env from "../config/env";
  * Handles user sign-up and sign-in.
  * Issues JWT tokens
  */
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
-});
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;

@@ -1,13 +1,14 @@
 import { Response, Request } from "express";
 import { parseJiraTicket } from "../services/jiraService";
-import { extractTicketKeys, appendSlaResults } from "../services/excelService";
+import { extractTicketData, appendSlaResults } from "../services/excelService";
 import {
   normalize,
   buildIntervals,
   getSecondLineIntervals,
 } from "../services/slaService";
 import { getTotalWorkingTime } from "../utils/workingTime";
-import env from "../config/env";
+import { getSpecialDays } from "../services/holidayService";
+import prisma from "../prisma";
 
 /**
  * Controls SLA calculation flow
@@ -26,38 +27,48 @@ export const processFile = async (
       return;
     }
 
-    if (!env.jiraEmail || !env.jiraToken || !env.baseURL) {
-      res.status(500).json({ error: "Missing Jira credentials" });
+    const settings = await prisma.settings.findUnique({
+      where: { userId: req.user.userId },
+    });
+
+    if (
+      !settings?.jiraUsername ||
+      !settings?.jiraToken ||
+      !settings?.jiraSubdomain
+    ) {
+      res.status(400).json({ error: "Jira settings are not configured" });
       return;
     }
 
     const auth = {
-      username: env.jiraEmail,
-      password: env.jiraToken,
+      username: settings.jiraUsername,
+      password: settings.jiraToken,
     };
 
-    await parseJiraTicket(`${env.baseURL}/rest/api/2/myself`, auth);
+    const baseURL = `https://${settings.jiraSubdomain}.atlassian.net`;
+
+    await parseJiraTicket(`${baseURL}/rest/api/2/myself`, auth);
 
     const buffer = req.file.buffer;
-    const ticketKeys = await extractTicketKeys(buffer);
+    const ticketKeys = await extractTicketData(buffer);
 
     if (ticketKeys.length === 0) {
       res.status(400).json({ error: "No tickets found in the Excel file" });
       return;
     }
 
+    const allIntervals: { key: string; secondLineIntervals: any[] }[] = [];
     const results = new Map<string, number | string>();
 
     for (const key of ticketKeys) {
       try {
-        const url = `${env.baseURL}/rest/servicedeskapi/request/${key}/status`;
+        const url = `${baseURL}/rest/servicedeskapi/request/${key}/status`;
         const ticketStatus = await parseJiraTicket(url, auth);
         const timestamps = ticketStatus.values.reverse();
         const timestampsNormalized = normalize(timestamps);
         const timeIntervals = buildIntervals(timestampsNormalized);
         const secondLineIntervals = getSecondLineIntervals(timeIntervals);
-        const totalWorkingTime = getTotalWorkingTime(secondLineIntervals);
-        results.set(key, Math.ceil(totalWorkingTime));
+        allIntervals.push({ key, secondLineIntervals });
       } catch (err: any) {
         // Hanlde Axios's error object
         const status = err.response?.status;
@@ -73,6 +84,31 @@ export const processFile = async (
         else if (status === 429) results.set(key, "RATE LIMITED"); //
         else results.set(key, "ERROR"); // default error
       }
+    }
+
+    const years = [
+      ...new Set(
+        allIntervals
+          .flatMap((t) => t.secondLineIntervals)
+          .flatMap((i) => [
+            new Date(i.start).getFullYear(),
+            new Date(i.end).getFullYear(),
+          ])
+      ),
+    ];
+
+    const specialDays = await getSpecialDays(
+      settings.country ?? "AZ",
+      years.length > 0 ? years : [new Date().getFullYear()]
+    );
+
+    for (const { key, secondLineIntervals } of allIntervals) {
+      if (results.has(key)) continue;
+      const totalWorkingTime = getTotalWorkingTime(
+        secondLineIntervals,
+        specialDays
+      );
+      results.set(key, Math.ceil(totalWorkingTime));
     }
 
     if (Array.from(results.values()).every((v) => typeof v === "string")) {
@@ -104,6 +140,10 @@ export const processFile = async (
   } catch (err: any) {
     if (err.name === "ClientError") {
       res.status(400).json({ error: err.message });
+    } else if (err.config?.url?.includes("date.nager.at")) {
+      res
+        .status(503)
+        .json({ error: "Failed to fetch public holidays. Please try again." });
     } else if (!err.response) {
       res.status(503).json({ error: "Jira server is unreachable" });
     } else {

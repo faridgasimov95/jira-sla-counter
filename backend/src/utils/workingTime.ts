@@ -1,5 +1,11 @@
 import { StatusInterval } from "../services/slaService";
-import { DayType, getDayType, WORKING_HOURS } from "./calendar";
+import {
+  DayType,
+  getDayType,
+  SpecialDay,
+  specialDays,
+  WORKING_HOURS,
+} from "./calendar";
 
 /**
  * Returns a new Date with the time set to the given hour (minutes, seconds and milliseconds zeroed out).
@@ -41,7 +47,11 @@ const getOverlap = (
  * @param endMs - End time of the interval
  * @returns Working time in milliseconds
  */
-const getIntervalWorkingTime = (startMs: number, endMs: number): number => {
+const getIntervalWorkingTime = (
+  startMs: number,
+  endMs: number,
+  specialDays: SpecialDay[]
+): number => {
   let intervalWorkingTime = 0;
 
   let current = new Date(startMs);
@@ -57,7 +67,7 @@ const getIntervalWorkingTime = (startMs: number, endMs: number): number => {
     const intervalStart = Math.max(startMs, dayStart.getTime());
     const intervalEnd = Math.min(endMs, dayEnd.getTime());
 
-    const dayType = getDayType(dayStart);
+    const dayType = getDayType(dayStart, specialDays);
 
     if (dayType === DayType.WEEKEND || dayType === DayType.HOLIDAY) {
       current = dayEnd;
@@ -104,10 +114,13 @@ const getIntervalWorkingTime = (startMs: number, endMs: number): number => {
  * @return Total working time in minutes
  */
 
-export const getTotalWorkingTime = (intervals: StatusInterval[]): number => {
+export const getTotalWorkingTime = (
+  intervals: StatusInterval[],
+  specialDays: SpecialDay[]
+): number => {
   const milliseconds = intervals.reduce(
     (acc, interval) =>
-      acc + getIntervalWorkingTime(interval.start, interval.end),
+      acc + getIntervalWorkingTime(interval.start, interval.end, specialDays),
     0
   );
 

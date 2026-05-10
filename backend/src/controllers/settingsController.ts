@@ -1,14 +1,9 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "../../generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-
+import prisma from "../prisma";
 /**
  * User settings controller.
  * Handles getting and updating user settings.
  */
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
-});
 
 export const getSettings = async (
   req: Request,

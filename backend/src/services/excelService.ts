@@ -6,7 +6,7 @@ import { ClientError } from "../utils/errors";
  * @param buffer - The uploaded Excel file as a buffer
  * @returns Array of ticket numbers
  */
-export const extractTicketKeys = async (buffer: Buffer): Promise<string[]> => {
+export const extractTicketData = async (buffer: Buffer): Promise<string[]> => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as any);
 
