@@ -9,6 +9,7 @@ import {
 import { getTotalWorkingTime } from "../utils/workingTime";
 import { getSpecialDays } from "../services/holidayService";
 import prisma from "../prisma";
+import { SlaResultMap } from "../types/sla";
 
 /**
  * Controls SLA calculation flow
@@ -52,23 +53,37 @@ export const processFile = async (
     const buffer = req.file.buffer;
     const ticketKeys = await extractTicketData(buffer);
 
-    if (ticketKeys.length === 0) {
+    if (ticketKeys.size === 0) {
       res.status(400).json({ error: "No tickets found in the Excel file" });
       return;
     }
 
-    const allIntervals: { key: string; secondLineIntervals: any[] }[] = [];
-    const results = new Map<string, number | string>();
+    const allIntervals: {
+      key: string;
+      intervals: any[];
+      prio: string;
+      typeId: number;
+    }[] = [];
+    const results: SlaResultMap = new Map();
 
-    for (const key of ticketKeys) {
+    for (const [key, prio] of ticketKeys) {
       try {
-        const url = `${baseURL}/rest/servicedeskapi/request/${key}/status`;
-        const ticketStatus = await parseJiraTicket(url, auth);
+        const statusUrl = `${baseURL}/rest/servicedeskapi/request/${key}/status`;
+        const infoUrl = `${baseURL}/rest/servicedeskapi/request/${key}`;
+        const ticketStatus = await parseJiraTicket(statusUrl, auth);
+        const ticketInfo = await parseJiraTicket(infoUrl, auth);
+        // Ignore certain ticket types (no deadline)
+
         const timestamps = ticketStatus.values.reverse();
         const timestampsNormalized = normalize(timestamps);
         const timeIntervals = buildIntervals(timestampsNormalized);
         const secondLineIntervals = getSecondLineIntervals(timeIntervals);
-        allIntervals.push({ key, secondLineIntervals });
+        allIntervals.push({
+          key,
+          intervals: secondLineIntervals,
+          prio,
+          typeId: ticketInfo.requestTypeId,
+        });
       } catch (err: any) {
         // Hanlde Axios's error object
         const status = err.response?.status;
@@ -78,18 +93,33 @@ export const processFile = async (
         }
 
         if (status === 403)
-          results.set(key, "NO ACCESS"); // no access to the ticket
+          results.set(key, {
+            sla: "NO ACCESS",
+            status: "NO ACCESS",
+            note: "NO ACCESS",
+          });
+        // no access to the ticket
         else if (status === 404)
-          results.set(key, "NOT FOUND"); // ticket not found
-        else if (status === 429) results.set(key, "RATE LIMITED"); //
-        else results.set(key, "ERROR"); // default error
+          results.set(key, {
+            sla: "NOT FOUND",
+            status: "NOT FOUND",
+            note: "NOT FOUND",
+          });
+        // ticket not found
+        else if (status === 429)
+          results.set(key, {
+            sla: "RATE LIMITED",
+            status: "RATE LIMITED",
+            note: "RATE LIMITED",
+          });
+        else results.set(key, { sla: "ERROR", status: "ERROR", note: "ERROR" }); // default error
       }
     }
-
+    // Get the years in which ticket was active
     const years = [
       ...new Set(
         allIntervals
-          .flatMap((t) => t.secondLineIntervals)
+          .flatMap((t) => t.intervals)
           .flatMap((i) => [
             new Date(i.start).getFullYear(),
             new Date(i.end).getFullYear(),
@@ -102,26 +132,37 @@ export const processFile = async (
       years.length > 0 ? years : [new Date().getFullYear()]
     );
 
-    for (const { key, secondLineIntervals } of allIntervals) {
+    const priorityThresholds =
+      (settings.priorityThresholds as { name: string; minutes: number }[]) ??
+      [];
+
+    for (const { key, intervals, prio, typeId } of allIntervals) {
       if (results.has(key)) continue;
-      const totalWorkingTime = getTotalWorkingTime(
-        secondLineIntervals,
-        specialDays
-      );
-      results.set(key, Math.ceil(totalWorkingTime));
+      const totalWorkingTime = getTotalWorkingTime(intervals, specialDays);
+      const sla = Math.ceil(totalWorkingTime);
+      const threshold = priorityThresholds.find((p) => p.name === prio);
+      const status = threshold
+        ? sla > threshold?.minutes
+          ? "Overdue"
+          : "Ok"
+        : null;
+      const note = settings.ignoredStatusCodes.includes(Number(typeId))
+        ? "Development"
+        : "";
+      results.set(key, { sla, status, note });
     }
 
-    if (Array.from(results.values()).every((v) => typeof v === "string")) {
+    if (Array.from(results.values()).every((v) => typeof v.sla === "string")) {
       res.status(400).json({ error: "None of the tickets could be processed" });
       return;
     }
 
     const hasProblematic = Array.from(results.values()).some(
       (v) =>
-        v === "NO ACCESS" ||
-        v === "NOT FOUND" ||
-        v === "RATE LIMITED" ||
-        v === "ERROR"
+        v.sla === "NO ACCESS" ||
+        v.sla === "NOT FOUND" ||
+        v.sla === "RATE LIMITED" ||
+        v.sla === "ERROR"
     );
 
     const updatedBuffer = await appendSlaResults(buffer, results);
