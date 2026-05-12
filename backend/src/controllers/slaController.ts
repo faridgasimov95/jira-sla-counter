@@ -20,7 +20,7 @@ import { SlaResultMap } from "../types/sla";
  */
 export const processFile = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   try {
     if (!req.file) {
@@ -74,7 +74,6 @@ export const processFile = async (
           parseJiraTicket(statusUrl, auth),
           parseJiraTicket(infoUrl, auth),
         ]);
-        // Ignore certain ticket types (no deadline)
 
         const timestamps = ticketStatus.values.reverse();
         const timestampsNormalized = normalize(timestamps);
@@ -125,13 +124,13 @@ export const processFile = async (
           .flatMap((i) => [
             new Date(i.start).getFullYear(),
             new Date(i.end).getFullYear(),
-          ]),
+          ])
       ),
     ];
 
     const specialDays = await getSpecialDays(
       settings.country ?? "AZ",
-      years.length > 0 ? years : [new Date().getFullYear()],
+      years.length > 0 ? years : [new Date().getFullYear()]
     );
 
     const priorityThresholds =
@@ -164,20 +163,30 @@ export const processFile = async (
         v.sla === "NO ACCESS" ||
         v.sla === "NOT FOUND" ||
         v.sla === "RATE LIMITED" ||
-        v.sla === "ERROR",
+        v.sla === "ERROR"
     );
 
     const updatedBuffer = await appendSlaResults(buffer, results);
 
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=sla-results.xlsx",
+      "attachment; filename=sla-results.xlsx"
     );
     if (hasProblematic) res.setHeader("X-Has-Warnings", "true");
+
+    await prisma.savedFile
+      .create({
+        data: {
+          userId: req.user.userId,
+          filename: `sla-results-${Date.now()}.xlsx`,
+          filedata: updatedBuffer,
+        },
+      })
+      .catch((err) => console.error("Failed to save file:", err));
 
     res.send(updatedBuffer);
   } catch (err: any) {
