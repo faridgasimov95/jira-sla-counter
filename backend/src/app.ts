@@ -3,6 +3,7 @@ import cors from "cors";
 import slaRoutes from "./routes/slaRoutes";
 import authRoutes from "./routes/authRoutes";
 import settingsRouter from "./routes/settingsRoutes";
+import historyRouter from "./routes/historyRoutes";
 
 /**
  * Express App configuration.
@@ -12,7 +13,7 @@ const app = express();
 
 app.use(
   cors({
-    exposedHeaders: ["X-Has-Warnings"],
+    exposedHeaders: ["X-Has-Warnings", "Content-Disposition"],
   })
 );
 app.use(express.json());
@@ -24,5 +25,6 @@ app.get("/", (req, res) => {
 app.use("/api", slaRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/settings", settingsRouter);
+app.use("/api/history", historyRouter);
 
 export default app;
