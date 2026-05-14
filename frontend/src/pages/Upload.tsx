@@ -12,6 +12,7 @@ export default function UploadPage() {
   const [noFileWarning, setNoFileWarning] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [fileHasWarnings, setFileHasWarnings] = useState<boolean>(false);
+  const [fileName, setFileName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { settingsComplete, isLoadingSettings } = useSettings();
@@ -59,8 +60,12 @@ export default function UploadPage() {
 
     try {
       // Generate the download URL
-      const { blob, hasWarnings } = await processExcelFile(file, user!.token);
+      const { blob, hasWarnings, filename } = await processExcelFile(
+        file,
+        user!.token
+      );
       setFileHasWarnings(hasWarnings);
+      setFileName(filename);
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
     } catch (err) {
@@ -74,7 +79,7 @@ export default function UploadPage() {
     if (!downloadUrl) return;
     const a = document.createElement("a");
     a.href = downloadUrl;
-    a.download = "sla-results.xlsx";
+    a.download = fileName;
     a.click();
   };
 

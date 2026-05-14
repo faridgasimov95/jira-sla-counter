@@ -99,14 +99,12 @@ export const processFile = async (
             status: "NO ACCESS",
             note: "NO ACCESS",
           });
-        // no access to the ticket
         else if (status === 404)
           results.set(key, {
             sla: "NOT FOUND",
             status: "NOT FOUND",
             note: "NOT FOUND",
           });
-        // ticket not found
         else if (status === 429)
           results.set(key, {
             sla: "RATE LIMITED",
@@ -174,7 +172,10 @@ export const processFile = async (
     );
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=sla-results.xlsx"
+      `attachment; filename=${req.file.originalname.replace(
+        ".xlsx",
+        ""
+      )}-processed.xlsx`
     );
     if (hasProblematic) res.setHeader("X-Has-Warnings", "true");
 
@@ -182,7 +183,10 @@ export const processFile = async (
       .create({
         data: {
           userId: req.user.userId,
-          filename: `sla-results-${Date.now()}.xlsx`,
+          filename: `${req.file.originalname.replace(
+            ".xlsx",
+            ""
+          )}-processed.xlsx`,
           filedata: updatedBuffer,
         },
       })
