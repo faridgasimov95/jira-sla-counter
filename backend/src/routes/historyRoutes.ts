@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { getHistory, downloadFile } from "../controllers/historyController";
+import {
+  getHistory,
+  downloadFile,
+  deleteFile,
+} from "../controllers/historyController";
 import { requireAuth } from "../middlewares/authMiddleware";
 
 /**
@@ -11,5 +15,6 @@ const router = Router();
 
 router.get("/", requireAuth, getHistory);
 router.get("/:id/download", requireAuth, downloadFile);
+router.delete("/:id", requireAuth, deleteFile);
 
 export default router;

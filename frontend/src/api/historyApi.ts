@@ -43,3 +43,23 @@ export async function downloadFile(
   const blob = await response.blob();
   return { blob, filename };
 }
+
+export async function deleteFile(
+  fileId: number,
+  token: string
+): Promise<{ filename: string }> {
+  const response = await fetch(`${API_URL}/api/history/${fileId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
