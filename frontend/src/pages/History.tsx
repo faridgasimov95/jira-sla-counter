@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { HistoryFile } from "../types/history";
 import { downloadFile, getHistory } from "../api/historyApi";
 import {
+  submitButtonClass,
   tableCellClass,
   tableHeaderClass,
   tableRowClass,
@@ -44,6 +45,7 @@ export default function HistoryPage() {
             <tr className={tableRowClass}>
               <th className={tableHeaderClass}>Filename</th>
               <th className={tableHeaderClass}>Date</th>
+              <th className={tableHeaderClass}>Size</th>
               <th className={tableHeaderClass}></th>
             </tr>
           </thead>
@@ -55,7 +57,13 @@ export default function HistoryPage() {
                   {new Date(file.savedAt).toLocaleString()}
                 </td>
                 <td className={tableCellClass}>
-                  <button onClick={() => handleDownload(file.id)}>
+                  {(file.size / 1024).toFixed(1) + " KB"}
+                </td>
+                <td className={tableCellClass}>
+                  <button
+                    className={submitButtonClass}
+                    onClick={() => handleDownload(file.id)}
+                  >
                     Download
                   </button>
                 </td>
