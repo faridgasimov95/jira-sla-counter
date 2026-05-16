@@ -145,6 +145,11 @@ export default function HistoryPage() {
             ))}
           </tbody>
         </table>
+        {history.length === 0 && (
+          <p className="text-sm text-text-muted text-center py-4">
+            No files yet
+          </p>
+        )}
       </div>
     </div>
   );
