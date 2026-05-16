@@ -36,4 +36,5 @@ model SavedFile{
   savedAt             DateTime    @default(now())
   filename            String
   filedata            Bytes
+  size                Int
 }

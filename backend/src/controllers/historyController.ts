@@ -8,18 +8,11 @@ export const getHistory = async (
   try {
     const files = await prisma.savedFile.findMany({
       where: { userId: req.user.userId },
-      select: { id: true, filename: true, savedAt: true, filedata: true },
+      select: { id: true, filename: true, savedAt: true, size: true },
       orderBy: { savedAt: "desc" },
     });
 
-    res.json(
-      files.map((f) => ({
-        id: f.id,
-        savedAt: f.savedAt,
-        filename: f.filename,
-        size: f.filedata.length,
-      }))
-    );
+    res.json(files);
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch history" });
   }

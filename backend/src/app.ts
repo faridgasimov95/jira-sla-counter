@@ -13,7 +13,11 @@ const app = express();
 
 app.use(
   cors({
-    exposedHeaders: ["X-Has-Warnings", "Content-Disposition"],
+    exposedHeaders: [
+      "X-Has-Warnings",
+      "X-Storage-Limit",
+      "Content-Disposition",
+    ],
   })
 );
 app.use(express.json());

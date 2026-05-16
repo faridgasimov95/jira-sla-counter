@@ -179,18 +179,30 @@ export const processFile = async (
     );
     if (hasProblematic) res.setHeader("X-Has-Warnings", "true");
 
-    await prisma.savedFile
-      .create({
-        data: {
-          userId: req.user.userId,
-          filename: `${req.file.originalname.replace(
-            ".xlsx",
-            ""
-          )}-processed.xlsx`,
-          filedata: updatedBuffer,
-        },
-      })
-      .catch((err) => console.error("Failed to save file:", err));
+    const { _sum } = await prisma.savedFile.aggregate({
+      where: { userId: req.user.userId },
+      _sum: { size: true },
+    });
+
+    const totalSize = _sum.size ?? 0;
+
+    if (totalSize + updatedBuffer.length > 1 * 1024 * 1024) {
+      res.setHeader("X-Storage-Limit", "true");
+    } else {
+      await prisma.savedFile
+        .create({
+          data: {
+            userId: req.user.userId,
+            filename: `${req.file.originalname.replace(
+              ".xlsx",
+              ""
+            )}-processed.xlsx`,
+            filedata: updatedBuffer,
+            size: updatedBuffer.length,
+          },
+        })
+        .catch((err) => console.error("Failed to save file:", err));
+    }
 
     res.send(updatedBuffer);
   } catch (err: any) {

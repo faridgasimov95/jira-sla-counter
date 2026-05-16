@@ -4,19 +4,18 @@ import StatusNotification from "../components/Notification";
 import { useAuth } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../hooks/useNotification";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [noFileWarning, setNoFileWarning] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [fileHasWarnings, setFileHasWarnings] = useState<boolean>(false);
   const [fileName, setFileName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { settingsComplete, isLoadingSettings } = useSettings();
   const navigate = useNavigate();
+  const { notification, isLeaving, showNotification } = useNotification();
 
   useEffect(() => {
     if (isLoadingSettings) return;
@@ -38,38 +37,40 @@ export default function UploadPage() {
   const handleReset = () => {
     setDownloadUrl(null);
     setFile(null);
-    setNoFileWarning(false);
-    setFileHasWarnings(false);
-    setError(null);
     // DOM Sync: clear input value so onChange fires even if the same file is selected again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleUpload = async () => {
     if (!file) {
-      setNoFileWarning(true);
+      showNotification("warning", "Please select the file first!");
       return;
     }
 
     setIsLoading(true);
     setDownloadUrl(null);
-    setFileHasWarnings(false);
-    setError(null);
 
     try {
       // Generate the download URL
-      const { blob, hasWarnings, filename } = await processExcelFile(
-        file,
-        user!.token
-      );
-      setFileHasWarnings(hasWarnings);
+      const { blob, hasWarnings, filename, storageLimit } =
+        await processExcelFile(file, user!.token);
       setFileName(filename);
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
+
+      let message = "Your file is ready for download!";
+      if (storageLimit)
+        message += " (Not saved to history — storage limit reached)";
+      if (hasWarnings)
+        message +=
+          " Some tickets could not be processed. Check the Excel file for details.";
+
+      showNotification(
+        hasWarnings || storageLimit ? "warning" : "success",
+        message
+      );
     } catch (err) {
-      if (err instanceof Error) setError(err.message);
+      if (err instanceof Error) showNotification("error", `${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -85,26 +86,13 @@ export default function UploadPage() {
 
   return (
     <div className="flex h-full bg-background items-center justify-center">
-      {downloadUrl && (
+      {notification && (
         <StatusNotification
-          status="success"
-          message="✓ Your file is ready for download!"
+          status={notification.status}
+          message={notification.message}
+          isLeaving={isLeaving}
         />
       )}
-      {noFileWarning && (
-        <StatusNotification
-          status="warning"
-          message="⚠ Please select the file first!"
-        />
-      )}
-      {fileHasWarnings && (
-        <StatusNotification
-          status="warning"
-          message="⚠ Some tickets could not be processed. Check the Excel file for details."
-          second
-        />
-      )}
-      {error && <StatusNotification status="error" message={`❌ ${error}`} />}
       <div className="bg-surface border border-border p-8 rounded-2xl shadow-sm w-96">
         <h1 className="text-xl font-semibold mb-4">Upload Your File</h1>
         <div className="flex items-center gap-3">
