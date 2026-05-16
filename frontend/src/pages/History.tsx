@@ -11,6 +11,7 @@ import {
 import StatusNotification, {
   StatusNotificationProps,
 } from "../components/Notification";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryFile[]>([]);
@@ -21,6 +22,7 @@ export default function HistoryPage() {
   const [isLeaving, setIsLeaving] = useState(false);
   const timeoutRef1 = useRef<ReturnType<typeof setTimeout>>();
   const timeoutRef2 = useRef<ReturnType<typeof setTimeout>>();
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchHistory() {
@@ -95,6 +97,13 @@ export default function HistoryPage() {
           isLeaving={isLeaving}
         />
       )}
+      {deleteId && (
+        <ConfirmModal
+          onConfirm={handleDelete}
+          onClose={() => setDeleteId(null)}
+          id={deleteId}
+        />
+      )}
       <div className=" bg-surface border border-border p-8 rounded-2xl shadow-sm w-[45rem]">
         <h1 className="text-xl font-semibold mb-4 ">History</h1>
         <table className="w-full">
@@ -128,7 +137,7 @@ export default function HistoryPage() {
                 <td className={tableCellClass}>
                   <button
                     className="text-xs text-error font-medium hover:opacity-75 transition-opacity"
-                    onClick={() => handleDelete(file.id)}
+                    onClick={() => setDeleteId(file.id)}
                   >
                     Delete
                   </button>
