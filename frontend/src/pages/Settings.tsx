@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SettingsForm } from "../types/settings.ts";
 import FormField from "../components/FormField.tsx";
 import { COUNTRIES } from "../constants/countries.ts";
@@ -8,10 +8,9 @@ import {
   getSettings,
 } from "../api/settingsApi.ts";
 import { useAuth } from "../context/AuthContext.tsx";
-import StatusNotification, {
-  StatusNotificationProps,
-} from "../components/Notification.tsx";
+import StatusNotification from "../components/Notification.tsx";
 import { useSettings } from "../context/SettingsContext.tsx";
+import { useNotification } from "../hooks/useNotification.ts";
 
 export default function SettingsPage() {
   const [userSettings, setUserSettings] = useState<SettingsForm>({
@@ -28,12 +27,10 @@ export default function SettingsPage() {
     Partial<Record<keyof SettingsForm, string>>
   >({});
   const { user } = useAuth();
-  const [notification, setNotification] =
-    useState<StatusNotificationProps | null>(null);
-  const [isLeaving, setIsLeaving] = useState(false);
+  const { notification, isLeaving, showNotification, clearNotification } =
+    useNotification();
   const [isLoading, setIsLoading] = useState(false);
-  const timeoutRef1 = useRef<ReturnType<typeof setTimeout>>();
-  const timeoutRef2 = useRef<ReturnType<typeof setTimeout>>();
+
   const { handleSettingsComplete } = useSettings();
 
   useEffect(() => {
@@ -60,27 +57,9 @@ export default function SettingsPage() {
     fetchSettings();
 
     return () => {
-      clearTimeout(timeoutRef1.current);
-      clearTimeout(timeoutRef2.current);
+      clearNotification();
     };
   }, []);
-
-  function showNotification(
-    status: "success" | "warning" | "error",
-    message: string
-  ) {
-    clearTimeout(timeoutRef1.current);
-    clearTimeout(timeoutRef2.current);
-
-    setIsLeaving(false);
-    setNotification({ status, message });
-
-    timeoutRef1.current = setTimeout(() => setIsLeaving(true), 3000);
-    timeoutRef2.current = setTimeout(() => {
-      setNotification(null);
-      setIsLeaving(false);
-    }, 3500);
-  }
 
   function handleAddStatusCode() {
     const code = Number(statusCodeInput);
@@ -138,7 +117,7 @@ export default function SettingsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    setNotification(null);
+    clearNotification();
     setErrors({});
     const newErrors: Partial<Record<keyof SettingsForm, string>> = {};
 

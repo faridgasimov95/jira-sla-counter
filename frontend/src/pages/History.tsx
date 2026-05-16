@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { HistoryFile } from "../types/history";
 import { deleteFile, downloadFile, getHistory } from "../api/historyApi";
@@ -7,20 +7,15 @@ import {
   tableHeaderClass,
   tableRowClass,
 } from "../constants/styles";
-import StatusNotification, {
-  StatusNotificationProps,
-} from "../components/Notification";
+import StatusNotification from "../components/Notification";
 import ConfirmModal from "../components/ConfirmModal";
+import { useNotification } from "../hooks/useNotification";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryFile[]>([]);
   const { user } = useAuth();
   const [isDownloading, setIsDownloading] = useState<number | null>(null);
-  const [notification, setNotification] =
-    useState<StatusNotificationProps | null>(null);
-  const [isLeaving, setIsLeaving] = useState(false);
-  const timeoutRef1 = useRef<ReturnType<typeof setTimeout>>();
-  const timeoutRef2 = useRef<ReturnType<typeof setTimeout>>();
+  const { notification, isLeaving, showNotification } = useNotification();
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -29,32 +24,12 @@ export default function HistoryPage() {
         const data = await getHistory(user!.token);
         setHistory(data);
       } catch (err) {
-        console.error(err);
+        if (err instanceof Error) showNotification("error", err.message);
       }
     }
 
     fetchHistory();
   }, []);
-
-  function showNotification(
-    status: "success" | "warning" | "error",
-    message: string
-  ) {
-    clearTimeout(timeoutRef1.current);
-    clearTimeout(timeoutRef2.current);
-
-    setIsLeaving(false);
-    setNotification(null);
-
-    setTimeout(() => {
-      setNotification({ status, message });
-      timeoutRef1.current = setTimeout(() => setIsLeaving(true), 3000);
-      timeoutRef2.current = setTimeout(() => {
-        setNotification(null);
-        setIsLeaving(false);
-      }, 3500);
-    }, 50);
-  }
 
   async function handleDownload(id: number) {
     try {
