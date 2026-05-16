@@ -3,7 +3,6 @@ import { useAuth } from "../context/AuthContext";
 import { HistoryFile } from "../types/history";
 import { deleteFile, downloadFile, getHistory } from "../api/historyApi";
 import {
-  submitButtonClass,
   tableCellClass,
   tableHeaderClass,
   tableRowClass,
@@ -104,7 +103,7 @@ export default function HistoryPage() {
           id={deleteId}
         />
       )}
-      <div className=" bg-surface border border-border p-8 rounded-2xl shadow-sm w-[45rem]">
+      <div className=" bg-surface border border-border p-8 rounded-2xl shadow-sm w-[60rem]">
         <h1 className="text-xl font-semibold mb-4 ">History</h1>
         <table className="w-full">
           <thead>
@@ -127,7 +126,7 @@ export default function HistoryPage() {
                 </td>
                 <td className={tableCellClass}>
                   <button
-                    className={submitButtonClass}
+                    className="py-1 px-1 mt-1 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-colors disabled:opacity-50"
                     onClick={() => handleDownload(file.id)}
                     disabled={isDownloading !== null}
                   >
