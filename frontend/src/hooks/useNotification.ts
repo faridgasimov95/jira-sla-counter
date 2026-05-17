@@ -18,14 +18,12 @@ export function useNotification() {
     setIsLeaving(false);
     setNotification(null);
 
-    setTimeout(() => {
-      setNotification({ status, message });
-      timeoutRef1.current = setTimeout(() => setIsLeaving(true), 3000);
-      timeoutRef2.current = setTimeout(() => {
-        setNotification(null);
-        setIsLeaving(false);
-      }, 3500);
-    }, 50);
+    setNotification({ status, message });
+    timeoutRef1.current = setTimeout(() => setIsLeaving(true), 5000);
+    timeoutRef2.current = setTimeout(() => {
+      setNotification(null);
+      setIsLeaving(false);
+    }, 5500);
   }
 
   function clearNotification() {

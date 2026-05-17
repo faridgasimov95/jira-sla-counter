@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../hooks/useNotification";
+import { useToast } from "../hooks/useToast";
+import ToastNotification from "../components/ToastNotification";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -15,7 +17,12 @@ export default function UploadPage() {
   const { user } = useAuth();
   const { settingsComplete, isLoadingSettings } = useSettings();
   const navigate = useNavigate();
-  const { notification, isLeaving, showNotification } = useNotification();
+  const {
+    notification,
+    isLeaving: notificationIsLeaving,
+    showNotification,
+  } = useNotification();
+  const { toasts, isLeaving: toastIsLeaving, showToast } = useToast();
 
   useEffect(() => {
     if (isLoadingSettings) return;
@@ -58,17 +65,13 @@ export default function UploadPage() {
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
 
-      let message = "Your file is ready for download!";
-      if (storageLimit)
-        message += " (Not saved to history — storage limit reached)";
+      showNotification("success", "Your file is ready for download!");
       if (hasWarnings)
-        message +=
-          " Some tickets could not be processed. Check the Excel file for details.";
-
-      showNotification(
-        hasWarnings || storageLimit ? "warning" : "success",
-        message
-      );
+        showToast(
+          "Some tickets could not be processed. Check the Excel file for details."
+        );
+      if (storageLimit)
+        showToast("Not saved to history — storage limit reached.");
     } catch (err) {
       if (err instanceof Error) showNotification("error", `${err.message}`);
     } finally {
@@ -90,8 +93,11 @@ export default function UploadPage() {
         <StatusNotification
           status={notification.status}
           message={notification.message}
-          isLeaving={isLeaving}
+          isLeaving={notificationIsLeaving}
         />
+      )}
+      {toasts.length > 0 && (
+        <ToastNotification toasts={toasts} isLeaving={toastIsLeaving} />
       )}
       <div className="bg-surface border border-border p-8 rounded-2xl shadow-sm w-96">
         <h1 className="text-xl font-semibold mb-4">Upload Your File</h1>
