@@ -18,6 +18,15 @@ export default function HistoryPage() {
   const { notification, isLeaving, showNotification } = useNotification();
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const filesPerPage = 10;
+  const paginatedHistory = history.slice(
+    (currentPage - 1) * filesPerPage,
+    currentPage * filesPerPage
+  );
+  const totalPages = Math.ceil(history.length / filesPerPage);
+
   useEffect(() => {
     async function fetchHistory() {
       try {
@@ -52,7 +61,16 @@ export default function HistoryPage() {
   async function handleDelete(id: number) {
     try {
       const response = await deleteFile(id, user!.token);
-      setHistory((prev) => prev.filter((file) => file.id !== id));
+      setHistory((prev) => {
+        const updatedHistory = prev.filter((file) => file.id !== id);
+
+        const newTotalPages = Math.ceil(updatedHistory.length / filesPerPage);
+        if (currentPage > newTotalPages && newTotalPages > 0) {
+          setCurrentPage(newTotalPages);
+        }
+
+        return updatedHistory;
+      });
       showNotification(
         "success",
         `${response.filename} was successfully deleted`
@@ -87,10 +105,11 @@ export default function HistoryPage() {
               <th className={tableHeaderClass}>Date</th>
               <th className={tableHeaderClass}>Size</th>
               <th className={tableHeaderClass}></th>
+              <th className={tableHeaderClass}></th>
             </tr>
           </thead>
           <tbody>
-            {history.map((file) => (
+            {paginatedHistory.map((file) => (
               <tr key={file.id} className={tableRowClass}>
                 <td className={tableCellClass}>{file.filename}</td>
                 <td className={tableCellClass}>
@@ -120,10 +139,37 @@ export default function HistoryPage() {
             ))}
           </tbody>
         </table>
+
         {history.length === 0 && (
           <p className="text-sm text-text-muted text-center py-4">
             No files yet
           </p>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-divider">
+            <span className="text-sm text-text-muted">
+              Page <strong>{currentPage}</strong> of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 text-sm font-medium border border-divider rounded-lg hover:bg-background transition-colors disabled:opacity-50 disabled:hover:bg-transparent"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 text-sm font-medium border border-divider rounded-lg hover:bg-background transition-colors disabled:opacity-50 disabled:hover:bg-transparent"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
