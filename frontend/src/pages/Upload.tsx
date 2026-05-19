@@ -99,7 +99,7 @@ export default function UploadPage() {
       {toasts.length > 0 && (
         <ToastNotification toasts={toasts} isLeaving={toastIsLeaving} />
       )}
-      <div className="bg-surface border border-border p-8 rounded-2xl shadow-sm w-96">
+      <div className="bg-surface border border-divider p-8 rounded-2xl shadow-sm w-96">
         <h1 className="text-xl font-semibold mb-4">Upload Your File</h1>
         <div className="flex items-center gap-3">
           <input

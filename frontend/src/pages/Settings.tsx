@@ -161,7 +161,7 @@ export default function SettingsPage() {
           isLeaving={isLeaving}
         />
       )}
-      <div className=" bg-surface border border-border p-8 rounded-2xl shadow-sm w-[480px]">
+      <div className=" bg-surface border border-divider p-8 rounded-2xl shadow-sm w-[480px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <h1 className="text-xl font-semibold">Settings</h1>
           <div className="grid grid-cols-2 gap-4">

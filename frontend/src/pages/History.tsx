@@ -96,7 +96,7 @@ export default function HistoryPage() {
           id={deleteId}
         />
       )}
-      <div className=" bg-surface border border-border p-8 rounded-2xl shadow-sm w-[60rem]">
+      <div className=" bg-surface border border-divider p-8 rounded-2xl shadow-sm w-[60rem]">
         <h1 className="text-xl font-semibold mb-4 ">History</h1>
         <table className="w-full">
           <thead>
