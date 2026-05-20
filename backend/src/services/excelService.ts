@@ -8,10 +8,11 @@ import { SlaResultMap } from "../types/sla";
  * @returns Array of ticket numbers
  */
 export const extractTicketData = async (
-  buffer: Buffer
+  buffer: Buffer,
+  password?: string,
 ): Promise<Map<string, string>> => {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer as any);
+  await workbook.xlsx.load(buffer, { password });
 
   const worksheet = workbook.worksheets[0];
   const headerRow = worksheet.getRow(1);
@@ -76,10 +77,11 @@ export const extractTicketData = async (
  */
 export const appendSlaResults = async (
   buffer: Buffer,
-  results: SlaResultMap
+  results: SlaResultMap,
+  password?: string,
 ): Promise<Buffer> => {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer as any);
+  await workbook.xlsx.load(buffer, { password });
 
   const worksheet = workbook.worksheets[0];
   const headerRow = worksheet.getRow(1);
@@ -147,14 +149,14 @@ export const appendSlaResults = async (
  */
 export const autoFitColumnWidth = (
   column: ExcelJS.Column,
-  minimalWidth = 10
+  minimalWidth = 10,
 ) => {
   let maxColumnLength = 0;
   column.eachCell({ includeEmpty: true }, (cell) => {
     maxColumnLength = Math.max(
       maxColumnLength,
       minimalWidth,
-      cell.value ? cell.value.toString().length : 0
+      cell.value ? cell.value.toString().length : 0,
     );
   });
   column.width = maxColumnLength + 2;
