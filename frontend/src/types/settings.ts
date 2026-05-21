@@ -4,7 +4,6 @@ export interface SettingsForm {
   jiraToken: string;
   country: string;
   ignoredStatusCodes: number[];
-  excelPassword: string;
   priorityThresholds: PriorityThreshold[];
 }
 

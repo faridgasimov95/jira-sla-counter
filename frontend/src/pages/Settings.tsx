@@ -19,7 +19,6 @@ export default function SettingsPage() {
     jiraToken: "",
     country: "",
     ignoredStatusCodes: [],
-    excelPassword: "",
     priorityThresholds: [],
   });
   const [statusCodeInput, setStatusCodeInput] = useState("");
@@ -43,7 +42,6 @@ export default function SettingsPage() {
           jiraUsername: data.jiraUsername ?? "",
           jiraToken: data.jiraToken ?? "",
           country: data.country ?? "",
-          excelPassword: data.excelPassword ?? "",
           priorityThresholds: data.priorityThresholds ?? [],
           ignoredStatusCodes: data.ignoredStatusCodes ?? [],
         });
@@ -235,19 +233,6 @@ export default function SettingsPage() {
                 <span className="text-xs text-error">{errors.country}</span>
               )}
             </div>
-            <FormField
-              label="Excel Password"
-              name="excel_password"
-              type="password"
-              value={userSettings.excelPassword}
-              onChange={(e) =>
-                setUserSettings((prev) => ({
-                  ...prev,
-                  excelPassword: e.target.value,
-                }))
-              }
-              optional
-            />
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
