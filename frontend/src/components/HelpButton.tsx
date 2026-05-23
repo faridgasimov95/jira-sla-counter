@@ -8,7 +8,7 @@ export default function HelpButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-primary text-text-base text-sm font-semibold shadow-md hover:bg-primary-hover transition-colors flex items-center justify-center"
+        className="fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-primary text-white text-sm font-semibold shadow-md hover:bg-primary-hover transition-colors flex items-center justify-center"
       >
         ?
       </button>
