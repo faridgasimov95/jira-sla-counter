@@ -11,6 +11,8 @@ import { useAuth } from "../context/AuthContext.tsx";
 import StatusNotification from "../components/Notification.tsx";
 import { useSettings } from "../context/SettingsContext.tsx";
 import { useNotification } from "../hooks/useNotification.ts";
+import ChangePasswordModal from "../components/ChangePasswordModal.tsx";
+import DeleteAccountModal from "../components/deleteAccountModal.tsx";
 
 export default function SettingsPage() {
   const [userSettings, setUserSettings] = useState<SettingsForm>({
@@ -29,8 +31,9 @@ export default function SettingsPage() {
   const { notification, isLeaving, showNotification, clearNotification } =
     useNotification();
   const [isLoading, setIsLoading] = useState(false);
-
   const { handleSettingsComplete } = useSettings();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
   useEffect(() => {
     async function fetchSettings() {
@@ -151,7 +154,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex h-full bg-background items-start justify-center pt-16">
+    <div className="flex min-h-full bg-background items-start justify-center pt-16">
       {notification && (
         <StatusNotification
           status={notification.status}
@@ -159,179 +162,229 @@ export default function SettingsPage() {
           isLeaving={isLeaving}
         />
       )}
-      <div className=" bg-surface border border-divider p-8 rounded-2xl shadow-sm w-[480px]">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <h1 className="text-xl font-semibold">Settings</h1>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              label="Jira Subdomain"
-              name="jira_subdomain"
-              type="text"
-              value={userSettings.jiraSubdomain}
-              onChange={(e) => {
-                setUserSettings((prev) => ({
-                  ...prev,
-                  jiraSubdomain: e.target.value,
-                }));
-              }}
-              placeholder="your-domain"
-              error={errors.jiraSubdomain}
-            />
-            <FormField
-              label="Jira Username"
-              name="jira_username"
-              type="email"
-              value={userSettings.jiraUsername}
-              onChange={(e) => {
-                setUserSettings((prev) => ({
-                  ...prev,
-                  jiraUsername: e.target.value,
-                }));
-              }}
-              placeholder="you@company.com"
-              error={errors.jiraUsername}
-            />
-            <div className="col-span-2">
+      <div className="flex flex-col gap-6 w-[480px]">
+        <div className=" bg-surface border border-divider p-8 rounded-2xl shadow-sm w-[480px]">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <h1 className="text-xl font-semibold">Settings</h1>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                label="Jira Token"
-                name="jira_token"
+                label="Jira Subdomain"
+                name="jira_subdomain"
                 type="text"
-                value={userSettings.jiraToken}
+                value={userSettings.jiraSubdomain}
                 onChange={(e) => {
                   setUserSettings((prev) => ({
                     ...prev,
-                    jiraToken: e.target.value,
+                    jiraSubdomain: e.target.value,
                   }));
                 }}
-                placeholder="your API token"
-                error={errors.jiraToken}
+                placeholder="your-domain"
+                error={errors.jiraSubdomain}
               />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
-                Country
-              </label>
-              <select
-                value={userSettings.country}
+              <FormField
+                label="Jira Username"
+                name="jira_username"
+                type="email"
+                value={userSettings.jiraUsername}
                 onChange={(e) => {
                   setUserSettings((prev) => ({
                     ...prev,
-                    country: e.target.value,
+                    jiraUsername: e.target.value,
                   }));
                 }}
-                className={inputClass}
-              >
-                <option value="">Select a country</option>
-                <option disabled>──────────</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              {errors.country && (
-                <span className="text-xs text-error">{errors.country}</span>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-text-muted uppercase tracking-wide">
-                Ignored Status Codes
-              </span>
-              <span className="text-xs text-text-muted bg-slate-100 px-1.5 py-0.5 rounded">
-                optional
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                value={statusCodeInput}
-                placeholder="e.g. 333"
-                onChange={(e) => setStatusCodeInput(e.target.value)}
-                className={`${inputClass} flex-1`}
+                placeholder="you@company.com"
+                error={errors.jiraUsername}
               />
-              <button
-                onClick={handleAddStatusCode}
-                type="button"
-                className="text-xs text-primary font-medium hover:opacity-75 transition-opacity"
-              >
-                + Add
-              </button>
-            </div>
-            {userSettings.ignoredStatusCodes.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {userSettings.ignoredStatusCodes.map((code) => (
-                  <div
-                    key={code}
-                    className="flex items-center gap-1 bg-surface border border-divider rounded-lg px-2 py-1 text-sm text-text-base"
-                  >
-                    <span>{code}</span>
-                    <button
-                      onClick={() => handleRemoveStatusCode(code)}
-                      className="text-error hover:opacity-75 transition-opacity text-xs"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-text-muted uppercase tracking-wide">
-                Priority Thresholds
-              </span>
-              <button
-                type="button"
-                onClick={handleAddPriority}
-                className="text-xs text-primary font-medium hover:opacity-75 transition-opacity"
-              >
-                + Add
-              </button>
-            </div>
-            {userSettings.priorityThresholds.map((priority, index) => (
-              <div key={priority.id} className="flex items-center gap-2">
-                <input
-                  value={priority.name}
-                  placeholder="Name"
-                  onChange={(e) =>
-                    handlePriorityChange(index, "name", e.target.value)
-                  }
-                  className={`${inputClass} flex-1`}
+              <div className="col-span-2">
+                <FormField
+                  label="Jira Token"
+                  name="jira_token"
+                  type="text"
+                  value={userSettings.jiraToken}
+                  onChange={(e) => {
+                    setUserSettings((prev) => ({
+                      ...prev,
+                      jiraToken: e.target.value,
+                    }));
+                  }}
+                  placeholder="your API token"
+                  error={errors.jiraToken}
                 />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-text-muted uppercase tracking-wide">
+                  Country
+                </label>
+                <select
+                  value={userSettings.country}
+                  onChange={(e) => {
+                    setUserSettings((prev) => ({
+                      ...prev,
+                      country: e.target.value,
+                    }));
+                  }}
+                  className={inputClass}
+                >
+                  <option value="">Select a country</option>
+                  <option disabled>──────────</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.country && (
+                  <span className="text-xs text-error">{errors.country}</span>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-text-muted uppercase tracking-wide">
+                  Ignored Status Codes
+                </span>
+                <span className="text-xs text-text-muted bg-slate-100 px-1.5 py-0.5 rounded">
+                  optional
+                </span>
+              </div>
+              <div className="flex gap-2">
                 <input
                   type="number"
-                  value={priority.minutes}
-                  onChange={(e) =>
-                    handlePriorityChange(index, "minutes", e.target.value)
-                  }
-                  className={`${inputClass} w-24`}
+                  value={statusCodeInput}
+                  placeholder="e.g. 333"
+                  onChange={(e) => setStatusCodeInput(e.target.value)}
+                  className={`${inputClass} flex-1`}
                 />
                 <button
+                  onClick={handleAddStatusCode}
                   type="button"
-                  onClick={() => handleRemovePriority(index)}
-                  className="text-error hover:opacity-75 transition-opacity text-sm"
+                  className="text-xs text-primary font-medium hover:opacity-75 transition-opacity"
                 >
-                  ✕
+                  + Add
                 </button>
               </div>
-            ))}
-            {errors.priorityThresholds && (
-              <span className="text-xs text-error">
-                {errors.priorityThresholds}
-              </span>
-            )}
+              {userSettings.ignoredStatusCodes.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {userSettings.ignoredStatusCodes.map((code) => (
+                    <div
+                      key={code}
+                      className="flex items-center gap-1 bg-surface border border-divider rounded-lg px-2 py-1 text-sm text-text-base"
+                    >
+                      <span>{code}</span>
+                      <button
+                        onClick={() => handleRemoveStatusCode(code)}
+                        className="text-error hover:opacity-75 transition-opacity text-xs"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-text-muted uppercase tracking-wide">
+                  Priority Thresholds
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAddPriority}
+                  className="text-xs text-primary font-medium hover:opacity-75 transition-opacity"
+                >
+                  + Add
+                </button>
+              </div>
+              {userSettings.priorityThresholds.map((priority, index) => (
+                <div key={priority.id} className="flex items-center gap-2">
+                  <input
+                    value={priority.name}
+                    placeholder="Name"
+                    onChange={(e) =>
+                      handlePriorityChange(index, "name", e.target.value)
+                    }
+                    className={`${inputClass} flex-1`}
+                  />
+                  <input
+                    type="number"
+                    value={priority.minutes}
+                    onChange={(e) =>
+                      handlePriorityChange(index, "minutes", e.target.value)
+                    }
+                    className={`${inputClass} w-24`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePriority(index)}
+                    className="text-error hover:opacity-75 transition-opacity text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {errors.priorityThresholds && (
+                <span className="text-xs text-error">
+                  {errors.priorityThresholds}
+                </span>
+              )}
+            </div>
+            <button
+              type="submit"
+              className={submitButtonClass}
+              disabled={isLoading}
+            >
+              Save
+            </button>
+          </form>
+        </div>
+        <div className="bg-surface border border-divider p-8 rounded-2xl shadow-sm w-[480px] flex flex-col gap-4">
+          <h2 className="text-xl font-semibold">Account</h2>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-text-base">
+                  Change Password
+                </p>
+                <p className="text-xs text-text-muted">
+                  Update your login password
+                </p>
+              </div>
+              <button
+                onClick={() => setShowChangePassword(true)}
+                className="text-sm text-primary font-medium hover:opacity-75 transition-opacity"
+              >
+                Change
+              </button>
+            </div>
+            <div className="border-t border-divider" />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-error">Delete Account</p>
+                <p className="text-xs text-text-muted">
+                  Permanently delete your account and all data
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDeleteAccount(true)}
+                className="text-sm text-error font-medium hover:opacity-75 transition-opacity"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-          <button
-            type="submit"
-            className={submitButtonClass}
-            disabled={isLoading}
-          >
-            Save
-          </button>
-        </form>
+        </div>
+
+        {showChangePassword && (
+          <ChangePasswordModal
+            onClose={() => setShowChangePassword(false)}
+            onSuccess={() =>
+              showNotification("success", "Password changed successfully.")
+            }
+          />
+        )}
+        {showDeleteAccount && (
+          <DeleteAccountModal onClose={() => setShowDeleteAccount(false)} />
+        )}
       </div>
     </div>
   );

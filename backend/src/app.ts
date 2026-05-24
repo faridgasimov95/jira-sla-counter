@@ -4,6 +4,7 @@ import slaRoutes from "./routes/slaRoutes";
 import authRoutes from "./routes/authRoutes";
 import settingsRouter from "./routes/settingsRoutes";
 import historyRouter from "./routes/historyRoutes";
+import accountRouter from "./routes/accountRoute";
 
 /**
  * Express App configuration.
@@ -30,5 +31,6 @@ app.use("/api", slaRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/settings", settingsRouter);
 app.use("/api/history", historyRouter);
+app.use("/api/account", accountRouter);
 
 export default app;

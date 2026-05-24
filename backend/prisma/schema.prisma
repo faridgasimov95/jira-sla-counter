@@ -19,7 +19,7 @@ model User {
 model Settings{
   id                  Int         @id @default(autoincrement())
   userId              Int         @unique
-  user                User        @relation(fields: [userId], references: [id])
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   jiraSubdomain       String?
   jiraUsername        String?
   jiraToken           String?
@@ -32,7 +32,7 @@ model Settings{
 model SavedFile{
   id                  Int         @id @default(autoincrement())
   userId              Int         
-  user                User        @relation(fields: [userId], references: [id])
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedAt             DateTime    @default(now())
   filename            String
   filedata            Bytes
