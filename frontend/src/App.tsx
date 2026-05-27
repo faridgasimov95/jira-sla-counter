@@ -6,6 +6,7 @@ import RootLayout from "./pages/Root";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SettingsPage from "./pages/Settings";
 import SettingsContextProvider from "./context/SettingsContext";
+import NotFoundPage from "./pages/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
             <SettingsPage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: "*",
+        element: <NotFoundPage />,
       },
     ],
   },
