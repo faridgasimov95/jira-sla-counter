@@ -2,12 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { processExcelFile } from "../api/jiraApi";
 import StatusNotification from "../components/Notification";
 import { useAuth } from "../context/AuthContext";
-import { useSettings } from "../context/SettingsContext";
-import { useNavigate } from "react-router-dom";
 import { useNotification } from "../hooks/useNotification";
 import { useToast } from "../hooks/useToast";
 import ToastNotification from "../components/ToastNotification";
-
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -15,19 +12,13 @@ export default function UploadPage() {
   const [fileName, setFileName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const { settingsComplete, isLoadingSettings } = useSettings();
-  const navigate = useNavigate();
+
   const {
     notification,
     isLeaving: notificationIsLeaving,
     showNotification,
   } = useNotification();
   const { toasts, isLeaving: toastIsLeaving, showToast } = useToast();
-
-  useEffect(() => {
-    if (isLoadingSettings) return;
-    if (!settingsComplete) navigate("/settings");
-  }, [settingsComplete, isLoadingSettings]);
 
   // Cleanup memory on unmount
   useEffect(() => {
