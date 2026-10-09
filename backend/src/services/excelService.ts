@@ -8,7 +8,7 @@ import { SlaResultMap } from "../types/sla";
  * @returns Array of ticket numbers
  */
 export const extractTicketData = async (
-  buffer: Buffer
+  buffer: Buffer,
 ): Promise<Map<string, string>> => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as any);
@@ -19,11 +19,19 @@ export const extractTicketData = async (
   let priorityColumnIndex = -1;
 
   headerRow.eachCell((cell, colNumber) => {
-    if (cell.value === "Key") keyColumnIndex = colNumber;
+    if (
+      cell.value.toLowerCase() === "key" ||
+      cell.value.toLowerCase() === "issued key"
+    )
+      keyColumnIndex = colNumber;
   });
 
   headerRow.eachCell((cell, colNumber) => {
-    if (cell.value === "P") priorityColumnIndex = colNumber;
+    if (
+      cell.value.toLowerCase() === "p" ||
+      cell.value.toLowerCase() === "priority"
+    )
+      priorityColumnIndex = colNumber;
   });
 
   if (keyColumnIndex === -1) {
@@ -76,7 +84,7 @@ export const extractTicketData = async (
  */
 export const appendSlaResults = async (
   buffer: Buffer,
-  results: SlaResultMap
+  results: SlaResultMap,
 ): Promise<Buffer> => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as any);
@@ -147,14 +155,14 @@ export const appendSlaResults = async (
  */
 export const autoFitColumnWidth = (
   column: ExcelJS.Column,
-  minimalWidth = 10
+  minimalWidth = 10,
 ) => {
   let maxColumnLength = 0;
   column.eachCell({ includeEmpty: true }, (cell) => {
     maxColumnLength = Math.max(
       maxColumnLength,
       minimalWidth,
-      cell.value ? cell.value.toString().length : 0
+      cell.value ? cell.value.toString().length : 0,
     );
   });
   column.width = maxColumnLength + 2;
