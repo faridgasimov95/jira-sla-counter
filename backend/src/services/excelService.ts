@@ -28,8 +28,8 @@ export const extractTicketData = async (
 
   headerRow.eachCell((cell, colNumber) => {
     if (
-      cell.value.toLowerCase() === "p" ||
-      cell.value.toLowerCase() === "priority"
+      (cell.value as String).toLowerCase() === "p" ||
+      (cell.value as String).toLowerCase() === "priority"
     )
       priorityColumnIndex = colNumber;
   });
@@ -95,7 +95,11 @@ export const appendSlaResults = async (
   const lastColumnIndex = headerRow.cellCount;
 
   headerRow.eachCell((cell, colNumber) => {
-    if (cell.value === "Key") keyColumnIndex = colNumber;
+    if (
+      (cell.value as String).toLowerCase() === "key" ||
+      (cell.value as String).toLowerCase() === "issued key"
+    )
+      keyColumnIndex = colNumber;
   });
 
   if (keyColumnIndex === -1) {
